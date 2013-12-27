@@ -25,7 +25,7 @@ module Iqeo
       begin
         parse_ip   host_str
       rescue HostspecException
-        @hostname = host_str
+        parse_hostname host_str
       end
     end
 
@@ -63,6 +63,11 @@ module Iqeo
       end
       @ip = octets.join '.'
       @ip_int = octets.reverse.collect.each_with_index { |octet,i| octet*(2**(i*8)) }.inject(:+)
+    end
+    
+    def parse_hostname str
+        @hostname = str
+        parse_ip Resolv.getaddress(str)
     end
 
   end

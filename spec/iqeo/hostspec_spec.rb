@@ -115,6 +115,17 @@ describe Iqeo::Hostspec do
       Iqeo::Hostspec.new('localhost').hostname.should eq 'localhost'
     end
 
+    it 'resolves a hostname only to host IP address' do
+      hs = Iqeo::Hostspec.new('localhost') 
+      hs.hostname.should eq 'localhost'
+      hs.ip.should eq '127.0.0.1'
+      hs.ip_int.should eq (127*16777216 + 1)
+      hs.mask.should eq '255.255.255.255'
+      hs.mask_length.should eq 32
+    end
+
+    it 'resolves a hostname and mask to network IP address'
+
   end
 
 end
