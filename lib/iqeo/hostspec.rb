@@ -15,18 +15,19 @@ module Iqeo
 
     VERSION = '0.0.1'
 
-    attr_reader :mask, :mask_length, :mask_int, :ip, :ip_int, :hostname
+    attr_reader :string, :mask, :mask_length, :mask_int, :address_spec, :hostname
 
-    def initialize specstr
-      raise HostspecException, 'spec cannot be empty' if specstr.empty?
-      host_str, mask_str = split_on_slash specstr
+    def initialize spec_str
+      @string = spec_str
+      raise HostspecException, 'spec cannot be empty' if spec_str.empty?
+      host_str, mask_str = split_on_slash spec_str
       raise HostspecException, 'host cannot be empty' if host_str.empty?
       parse_mask mask_str
-      begin
-        parse_ip   host_str
-      rescue HostspecException
-        parse_hostname host_str
-      end
+      #begin
+        parse_address_spec host_str
+      #rescue HostspecException
+      #  parse_hostname host_str
+      #end
     end
 
     def split_on_slash str
@@ -41,6 +42,7 @@ module Iqeo
       if str.empty?
         @mask = '255.255.255.255'
         @mask_length = 32
+        @mask_int = 4294967295
         return
       end
       if match = str.match( /^\d+$/ )
@@ -52,22 +54,29 @@ module Iqeo
         raise "bad format, expected mask length after '/'"
       end
     end
-    
-    def parse_ip str
+
+    def parse_address_spec str
       octet_strs = str.split '.'
       raise HostspecException, 'bad ip, expected 4 octets' unless octet_strs.size == 4    
-      octets = octet_strs.collect do |octet_str|
-        match = octet_str.match /^(0*1?\d?\d|2[0-4][0-9]|25[0-5])$/
-        raise HostspecException, 'bad ip, invalid octet' unless match
-        match.to_s.to_i
-      end
-      @ip = octets.join '.'
-      @ip_int = octets.reverse.collect.each_with_index { |octet,i| octet*(2**(i*8)) }.inject(:+)
+      octets = octet_strs.collect { |octet_str| parse_octet octet_str }
+      #@address_int = octets.reverse.collect.each_with_index { |octet,i| octet*(2**(i*8)) }.inject(:+)
+      @address_spec = octets
     end
-    
+
+    def parse_octet str
+      octet = str.split(',')
+      ap octet
+      octet.collect do |number|
+        puts number
+        match = str.match /^(25[0-5]|2[0-4]\d|[0-1]\d\d|\d\d|\d)$/
+        raise HostspecException, 'bad ip, invalid octet' unless match
+        number.to_i
+      end
+    end
+
     def parse_hostname str
-        @hostname = str
-        parse_ip Resolv.getaddress(str)
+      @hostname = str
+      parse_address_spec Resolv.getaddress(str)
     end
 
   end

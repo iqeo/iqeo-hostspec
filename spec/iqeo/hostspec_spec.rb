@@ -1,4 +1,6 @@
 require 'iqeo/hostspec'
+require 'awesome_print'
+
 
 describe Iqeo::Hostspec do
 
@@ -95,37 +97,68 @@ describe Iqeo::Hostspec do
       expect { Iqeo::Hostspec.new '/32' }.to raise_error
     end
 
-    it 'is accepted when valid IP address' do
-      @octets.each_cons(4) do |octets|
-        ip = octets.join('.')
-        hs = Iqeo::Hostspec.new ip
-        hs.ip.should eq ip
-      end 
-    end  
+    context 'as simple IP address' do
 
+      it 'is accepted' do
+        @octets.each_cons(4) do |octets|
+          address = octets.join('.')
+          hs = Iqeo::Hostspec.new address
+          hs.address_spec.collect(&:first).should eq octets
+        end 
+      end  
 
-    it 'sets ip integer when valid IP address' do
-      @octets.each_cons(4) do |octets|
-        hs = Iqeo::Hostspec.new octets.join('.')
-        hs.ip_int.should eq (octets[0]*16777216 + octets[1]*65536 + octets[2]*256 + octets[3])
+#      it 'sets ip integer' do
+#        @octets.each_cons(4) do |octets|
+#          hs = Iqeo::Hostspec.new octets.join('.')
+#          hs.ip_int.should eq (octets[0]*16777216 + octets[1]*65536 + octets[2]*256 + octets[3])
+#        end
+#      end
+    
+    end
+
+    context 'as hostname' do
+
+      it 'is assumed when not an IP address' do
+        Iqeo::Hostspec.new('localhost').hostname.should eq 'localhost'
       end
+
+      it 'resolves to a host IP address' do
+        hs = Iqeo::Hostspec.new('localhost') 
+        hs.hostname.should eq 'localhost'
+        hs.address_spec.collect(&:first).should eq [127,0,0,1]
+        hs.mask.should eq '255.255.255.255'
+        hs.mask_length.should eq 32
+      end
+
+      it 'with mask resolves to network IP address' do
+        [32,24,16,8].each do |masklen|
+          hs = Iqeo::Hostspec.new("localhost/#{masklen}") 
+          hs.address_spec.collect(&:first).should eq [127,0,0,1]
+          hs.mask_length.should eq masklen
+        end
+      end
+  
     end
 
-    it 'is assumed a hostname when not an IP address' do
-      Iqeo::Hostspec.new('localhost').hostname.should eq 'localhost'
+    context 'as complex IP address spec' do
+
+      it 'with dash'
+
+      it 'with comma' do
+        hs = Iqeo::Hostspec.new '1.2.3.4,5,6'
+        hs.address_spec.should eq [[1],[2],[3],[4,5,6]]
+      end
+
     end
 
-    it 'resolves a hostname only to host IP address' do
-      hs = Iqeo::Hostspec.new('localhost') 
-      hs.hostname.should eq 'localhost'
-      hs.ip.should eq '127.0.0.1'
-      hs.ip_int.should eq (127*16777216 + 1)
-      hs.mask.should eq '255.255.255.255'
-      hs.mask_length.should eq 32
-    end
+  end
 
-    it 'resolves a hostname and mask to network IP address'
+  context 'enumerates' do
+  
+    it 'single address for a host'
 
+    it 'multiple address for a network'
+  
   end
 
 end
