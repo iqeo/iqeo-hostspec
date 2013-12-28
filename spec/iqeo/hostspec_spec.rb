@@ -130,35 +130,96 @@ describe Iqeo::Hostspec do
         hs.mask_length.should eq 32
       end
 
-      it 'with mask resolves to network IP address' do
-        [32,24,16,8].each do |masklen|
-          hs = Iqeo::Hostspec.new("localhost/#{masklen}") 
-          hs.address_spec.collect(&:first).should eq [127,0,0,1]
-          hs.mask_length.should eq masklen
-        end
-      end
+      # it 'with mask resolves to network IP address' do
+      #   [32,24,16,8].each do |masklen|
+      #     hs = Iqeo::Hostspec.new("localhost/#{masklen}") 
+      #     hs.address_spec.collect(&:first).should eq [127,0,0,1]
+      #     hs.mask_length.should eq masklen
+      #   end
+      # end
   
     end
 
-    context 'as complex IP address spec' do
+    context 'as IP address spec' do
 
-      it 'with dash'
-
-      it 'with comma' do
-        hs = Iqeo::Hostspec.new '1.2.3.4,5,6'
-        hs.address_spec.should eq [[1],[2],[3],[4,5,6]]
+      it 'may specify octet values with commas' do
+        hs = Iqeo::Hostspec.new '10,11,12.20,21,22.30,31,32.40,41,42'
+        hs.address_spec.should eq [[10,11,12],[20,21,22],[30,31,32],[40,41,42]]
       end
+      
+      context 'may specify octet value ranges with dashes' do
+
+        it 'in form "n-m"' do
+          hs = Iqeo::Hostspec.new '10-19.20-29.30-39.40-49'
+          hs.address_spec.should eq [[(10..19)],[(20..29)],[(30..39)],[(40..49)]]
+        end  
+
+        it 'in form "n-"' do
+          hs = Iqeo::Hostspec.new '10-.20-.30-.40-'
+          hs.address_spec.should eq [[(10..255)],[(20..255)],[(30..255)],[(40..255)]]
+        end  
+      
+        it 'in form "-m"' do
+          hs = Iqeo::Hostspec.new '-19.-29.-39.-49'
+          hs.address_spec.should eq [[(0..19)],[(0..29)],[(0..39)],[(0..49)]]
+        end  
+        
+        it 'in form "-"' do
+          hs = Iqeo::Hostspec.new '-.-.-.-'
+          hs.address_spec.should eq [[(0..255)],[(0..255)],[(0..255)],[(0..255)]]
+        end  
+      
+      end
+
+      it 'may specify octets with dashes and commas'
 
     end
 
   end
 
   context 'enumerates' do
-  
-    it 'single address for a host'
 
-    it 'multiple address for a network'
+    before(:all) do
+      @octets = (0..255).to_a
+    end
   
+    it 'a single address for a simple address' do
+      @octets.each_cons(4) do |octets|
+        address = octets.join('.')
+        hs = Iqeo::Hostspec.new address
+        address_count = 0
+        hs.each_address do |address_str|
+          address_str.should eq address
+          address_count += 1
+        end
+        address_count.should eq 1
+      end 
+    end
+
+    it 'multiple addresses for a spec with commas' do
+      address = '10,11,12.20,21,22.30,31,32.40,41,42'
+      expected_addresses = [
+        '10.20.30.40','10.20.30.41','10.20.30.42','10.20.31.40','10.20.31.41','10.20.31.42','10.20.32.40','10.20.32.41','10.20.32.42',
+        '10.21.30.40','10.21.30.41','10.21.30.42','10.21.31.40','10.21.31.41','10.21.31.42','10.21.32.40','10.21.32.41','10.21.32.42',
+        '10.22.30.40','10.22.30.41','10.22.30.42','10.22.31.40','10.22.31.41','10.22.31.42','10.22.32.40','10.22.32.41','10.22.32.42',
+        '11.20.30.40','11.20.30.41','11.20.30.42','11.20.31.40','11.20.31.41','11.20.31.42','11.20.32.40','11.20.32.41','11.20.32.42',
+        '11.21.30.40','11.21.30.41','11.21.30.42','11.21.31.40','11.21.31.41','11.21.31.42','11.21.32.40','11.21.32.41','11.21.32.42',
+        '11.22.30.40','11.22.30.41','11.22.30.42','11.22.31.40','11.22.31.41','11.22.31.42','11.22.32.40','11.22.32.41','11.22.32.42',
+        '12.20.30.40','12.20.30.41','12.20.30.42','12.20.31.40','12.20.31.41','12.20.31.42','12.20.32.40','12.20.32.41','12.20.32.42',
+        '12.21.30.40','12.21.30.41','12.21.30.42','12.21.31.40','12.21.31.41','12.21.31.42','12.21.32.40','12.21.32.41','12.21.32.42',
+        '12.22.30.40','12.22.30.41','12.22.30.42','12.22.31.40','12.22.31.41','12.22.31.42','12.22.32.40','12.22.32.41','12.22.32.42',
+      ]
+      hs = Iqeo::Hostspec.new address
+      address_count = 0
+      hs.each_address do |address_str|
+        address_str.should eq expected_addresses[address_count]
+        address_count +=1
+      end
+      address_count.should eq expected_addresses.size
+    end
+
+    it 'multiple addresses for a spec with dashes'
+
   end
 
 end

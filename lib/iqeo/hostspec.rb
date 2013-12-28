@@ -23,11 +23,11 @@ module Iqeo
       host_str, mask_str = split_on_slash spec_str
       raise HostspecException, 'host cannot be empty' if host_str.empty?
       parse_mask mask_str
-      #begin
+      begin
         parse_address_spec host_str
-      #rescue HostspecException
-      #  parse_hostname host_str
-      #end
+      rescue HostspecException
+        parse_hostname host_str
+      end
     end
 
     def split_on_slash str
@@ -64,13 +64,31 @@ module Iqeo
     end
 
     def parse_octet str
-      octet = str.split(',')
-      ap octet
-      octet.collect do |number|
-        puts number
-        match = str.match /^(25[0-5]|2[0-4]\d|[0-1]\d\d|\d\d|\d)$/
+      # octets may have multiple comma separated values
+      values = str.split ','
+      values.collect { |value_str| parse_octet_value value_str }
+    end
+
+    def parse_octet_value str
+      # values may be dash denoted ranges, possibilities...
+      #   n   : just a number         :   'n'.split '-' == ['n']       <= same = problem!    'n'.split '-', -1 == [ "n"       ] 
+      #   n-m : range from n to m     : 'n-m'.split '-' == ['n','m']                       'n-m'.split '-', -1 == [ "n" , "m" ]
+      #   n-  : range from n to 255   :  'n-'.split '-' == ['n']       <= same = problem!   'n-'.split '-', -1 == [ "n" , ""  ]
+      #   -m  : range from 0 to m     :  '-m'.split '-' == ['','m']                         '-m'.split '-', -1 == [ ""  , "m" ]
+      #   -   : range from 0 to 255   :   '-'.split '-' == []                                '-'.split '-', -1 == [ ""  , ""  ]
+      numbers = str.split '-', -1 # maximize return fields to distinguish 'n' from '-m'
+      case numbers.size
+      when 1 then
+        number = numbers[0]
+        match = number.match /^(25[0-5]|2[0-4]\d|[0-1]\d\d|\d\d|\d)$/
         raise HostspecException, 'bad ip, invalid octet' unless match
         number.to_i
+      when 2 then
+        numbers[0] =   '0' if numbers[0].empty?
+        numbers[1] = '255' if numbers[1].empty?
+        numbers[0].to_i..numbers[1].to_i
+      else
+        raise HostspecException, 'bad ip, invalid octet'
       end
     end
 
@@ -79,6 +97,16 @@ module Iqeo
       parse_address_spec Resolv.getaddress(str)
     end
 
+    def each_address
+      addresses_octets = @address_spec[0].product(@address_spec[1],@address_spec[2],@address_spec[3])
+      addresses_octets.each do |octets|
+        address = octets.join '.'
+        yield address
+      end
+    end
+  
   end
+
 end
+
 
