@@ -151,27 +151,35 @@ describe Iqeo::Hostspec do
 
         it 'in form "n-m"' do
           hs = Iqeo::Hostspec.new '10-19.20-29.30-39.40-49'
-          hs.address_spec.should eq [[(10..19)],[(20..29)],[(30..39)],[(40..49)]]
+          hs.address_spec.should eq [[10..19],[20..29],[30..39],[40..49]]
         end  
 
         it 'in form "n-"' do
           hs = Iqeo::Hostspec.new '10-.20-.30-.40-'
-          hs.address_spec.should eq [[(10..255)],[(20..255)],[(30..255)],[(40..255)]]
+          hs.address_spec.should eq [[10..255],[20..255],[30..255],[40..255]]
         end  
       
         it 'in form "-m"' do
           hs = Iqeo::Hostspec.new '-19.-29.-39.-49'
-          hs.address_spec.should eq [[(0..19)],[(0..29)],[(0..39)],[(0..49)]]
+          hs.address_spec.should eq [[0..19],[0..29],[0..39],[0..49]]
         end  
         
         it 'in form "-"' do
           hs = Iqeo::Hostspec.new '-.-.-.-'
-          hs.address_spec.should eq [[(0..255)],[(0..255)],[(0..255)],[(0..255)]]
+          hs.address_spec.should eq [[0..255],[0..255],[0..255],[0..255]]
         end  
       
       end
 
-      it 'may specify octets with dashes and commas'
+      it 'may mix octet specifications with dashes and commas' do
+        hs = Iqeo::Hostspec.new '1,10,100,200.13-247.23-.-99'
+        hs.address_spec.should eq [[1,10,100,200],[13..247],[23..255],[0..99]]
+      end
+
+      it 'may combine octet specification with dashes and commas' do
+        hs = Iqeo::Hostspec.new '0,1,10,100-200,250,254,255.-50,99,200-.-33,44,55-66,77,88-.-'
+        hs.address_spec.should eq [[0,1,10,100..200,250,254,255],[0..50,99,200..255],[0..33,44,55..66,77,88..255],[0..255]]
+      end
 
     end
 
@@ -196,7 +204,7 @@ describe Iqeo::Hostspec do
       end 
     end
 
-    it 'multiple addresses for a spec with commas' do
+    it 'multiple addresses for a spec with multiple octet values (commas)' do
       address = '10,11,12.20,21,22.30,31,32.40,41,42'
       expected_addresses = [
         '10.20.30.40','10.20.30.41','10.20.30.42','10.20.31.40','10.20.31.41','10.20.31.42','10.20.32.40','10.20.32.41','10.20.32.42',
@@ -218,7 +226,7 @@ describe Iqeo::Hostspec do
       address_count.should eq expected_addresses.size
     end
 
-    it 'multiple addresses for a spec with dashes'
+    it 'multiple addresses for a spec with octet ranges (dashes)'
 
   end
 
