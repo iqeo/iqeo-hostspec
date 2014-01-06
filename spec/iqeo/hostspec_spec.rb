@@ -1,7 +1,6 @@
 require 'iqeo/hostspec'
 require 'awesome_print'
 
-
 describe Iqeo::Hostspec do
 
   context '.new' do
@@ -97,7 +96,7 @@ describe Iqeo::Hostspec do
       expect { Iqeo::Hostspec.new '/32' }.to raise_error
     end
 
-    context 'as simple IP address' do
+    context 'being a simple IP address' do
 
       it 'is accepted' do
         @octets.each_cons(4) do |octets|
@@ -116,7 +115,7 @@ describe Iqeo::Hostspec do
     
     end
 
-    context 'as hostname' do
+    context 'being a hostname' do
 
       it 'is assumed when not an IP address' do
         Iqeo::Hostspec.new('localhost').hostname.should eq 'localhost'
@@ -140,7 +139,7 @@ describe Iqeo::Hostspec do
   
     end
 
-    context 'as IP address spec' do
+    context 'being an IP address spec' do
 
       it 'may specify octet values with commas' do
         hs = Iqeo::Hostspec.new '10,11,12.20,21,22.30,31,32.40,41,42'
@@ -189,9 +188,22 @@ describe Iqeo::Hostspec do
 
     before(:all) do
       @octets = (0..255).to_a
+      @multi_spec_with_commas = '10,11,12.20,21,22.30,31,32.40,41,42'
+      @multi_spec_with_dashes = '10-12.20-22.30-32.40-42'
+      @multi_expected_addresses = [
+        '10.20.30.40','10.20.30.41','10.20.30.42','10.20.31.40','10.20.31.41','10.20.31.42','10.20.32.40','10.20.32.41','10.20.32.42',
+        '10.21.30.40','10.21.30.41','10.21.30.42','10.21.31.40','10.21.31.41','10.21.31.42','10.21.32.40','10.21.32.41','10.21.32.42',
+        '10.22.30.40','10.22.30.41','10.22.30.42','10.22.31.40','10.22.31.41','10.22.31.42','10.22.32.40','10.22.32.41','10.22.32.42',
+        '11.20.30.40','11.20.30.41','11.20.30.42','11.20.31.40','11.20.31.41','11.20.31.42','11.20.32.40','11.20.32.41','11.20.32.42',
+        '11.21.30.40','11.21.30.41','11.21.30.42','11.21.31.40','11.21.31.41','11.21.31.42','11.21.32.40','11.21.32.41','11.21.32.42',
+        '11.22.30.40','11.22.30.41','11.22.30.42','11.22.31.40','11.22.31.41','11.22.31.42','11.22.32.40','11.22.32.41','11.22.32.42',
+        '12.20.30.40','12.20.30.41','12.20.30.42','12.20.31.40','12.20.31.41','12.20.31.42','12.20.32.40','12.20.32.41','12.20.32.42',
+        '12.21.30.40','12.21.30.41','12.21.30.42','12.21.31.40','12.21.31.41','12.21.31.42','12.21.32.40','12.21.32.41','12.21.32.42',
+        '12.22.30.40','12.22.30.41','12.22.30.42','12.22.31.40','12.22.31.41','12.22.31.42','12.22.32.40','12.22.32.41','12.22.32.42',
+      ]
     end
   
-    it 'a single address for a simple address' do
+    it 'a single address for host address' do
       @octets.each_cons(4) do |octets|
         address = octets.join('.')
         hs = Iqeo::Hostspec.new address
@@ -205,28 +217,26 @@ describe Iqeo::Hostspec do
     end
 
     it 'multiple addresses for a spec with multiple octet values (commas)' do
-      address = '10,11,12.20,21,22.30,31,32.40,41,42'
-      expected_addresses = [
-        '10.20.30.40','10.20.30.41','10.20.30.42','10.20.31.40','10.20.31.41','10.20.31.42','10.20.32.40','10.20.32.41','10.20.32.42',
-        '10.21.30.40','10.21.30.41','10.21.30.42','10.21.31.40','10.21.31.41','10.21.31.42','10.21.32.40','10.21.32.41','10.21.32.42',
-        '10.22.30.40','10.22.30.41','10.22.30.42','10.22.31.40','10.22.31.41','10.22.31.42','10.22.32.40','10.22.32.41','10.22.32.42',
-        '11.20.30.40','11.20.30.41','11.20.30.42','11.20.31.40','11.20.31.41','11.20.31.42','11.20.32.40','11.20.32.41','11.20.32.42',
-        '11.21.30.40','11.21.30.41','11.21.30.42','11.21.31.40','11.21.31.41','11.21.31.42','11.21.32.40','11.21.32.41','11.21.32.42',
-        '11.22.30.40','11.22.30.41','11.22.30.42','11.22.31.40','11.22.31.41','11.22.31.42','11.22.32.40','11.22.32.41','11.22.32.42',
-        '12.20.30.40','12.20.30.41','12.20.30.42','12.20.31.40','12.20.31.41','12.20.31.42','12.20.32.40','12.20.32.41','12.20.32.42',
-        '12.21.30.40','12.21.30.41','12.21.30.42','12.21.31.40','12.21.31.41','12.21.31.42','12.21.32.40','12.21.32.41','12.21.32.42',
-        '12.22.30.40','12.22.30.41','12.22.30.42','12.22.31.40','12.22.31.41','12.22.31.42','12.22.32.40','12.22.32.41','12.22.32.42',
-      ]
-      hs = Iqeo::Hostspec.new address
+      hs = Iqeo::Hostspec.new @multi_spec_with_commas
       address_count = 0
       hs.each_address do |address_str|
-        address_str.should eq expected_addresses[address_count]
+        address_str.should eq @multi_expected_addresses[address_count]
         address_count +=1
       end
-      address_count.should eq expected_addresses.size
+      address_count.should eq @multi_expected_addresses.size
     end
 
-    it 'multiple addresses for a spec with octet ranges (dashes)'
+    it 'multiple addresses for a spec with octet ranges (dashes)' do
+      hs = Iqeo::Hostspec.new @multi_spec_with_dashes
+      address_count = 0
+      hs.each_address do |address_str|
+        address_str.should eq @multi_expected_addresses[address_count]
+        address_count +=1
+      end
+      address_count.should eq @multi_expected_addresses.size
+    end
+
+    it 'network addresses for a spec with a subnet mask'
 
   end
 

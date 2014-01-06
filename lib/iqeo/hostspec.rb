@@ -97,11 +97,25 @@ module Iqeo
       parse_address_spec Resolv.getaddress(str)
     end
 
-    def each_address
-      addresses_octets = @address_spec[0].product(@address_spec[1],@address_spec[2],@address_spec[3])
-      addresses_octets.each do |octets|
-        address = octets.join '.'
-        yield address
+    def recursively_iterate_octets octet_index = 0, address = [], &block
+      @address_spec[octet_index].each do |item|
+        if item.respond_to? :each
+          item.each do |value|
+            address.push value
+            octet_index == 3 ? yield( address.join '.' ) : recursively_iterate_octets( octet_index + 1, address, &block )
+            address.pop
+          end
+        else
+          address.push item
+          octet_index == 3 ? yield( address.join '.' ) : recursively_iterate_octets( octet_index + 1, address, &block )
+          address.pop
+        end
+      end
+    end
+
+    def each_address 
+      recursively_iterate_octets do |address_str|
+        yield address_str
       end
     end
   
