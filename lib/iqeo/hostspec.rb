@@ -28,6 +28,7 @@ module Iqeo
       rescue HostspecException
         parse_hostname host_str
       end
+      mask_address_spec
     end
 
     def split_on_slash str
@@ -52,6 +53,24 @@ module Iqeo
         @mask = [24,16,8,0].collect { |n| ( @mask_int & ( 255 << n ) ) >> n }.join '.'
       else
         raise "bad format, expected mask length after '/'"
+      end
+    end
+
+    def mask_address_spec
+      @address_spec.each_with_index do |octet,index|
+        high_bit_position = ( index * 8 ) + 1 
+        low_bit_position = ( index + 1 ) * 8
+        @address_spec[index] = case
+        when @mask_length >= low_bit_position then octet
+        when @mask_length < high_bit_position then [0..255]
+        else
+          octet_mask_length = @mask_length % 8
+          octet_mask = ( ( 2 ** octet_mask_length ) - 1 ) << ( 8 - octet_mask_length )
+          octet_mask_inverted = octet_mask ^ 255
+          octet_min = octet_mask & octet[0]
+          octet_max = octet_min | octet_mask_inverted
+          [octet_min..octet_max]
+        end
       end
     end
 
