@@ -69,13 +69,6 @@ describe Iqeo::Hostspec do
       end
     end
 
-    it 'sets mask integer' do
-      @mask_integers.each_with_index do |int,len|
-        hs = Iqeo::Hostspec.new "1.2.3.4/#{len}"
-        hs.mask_int.should eq int
-      end
-    end
-
     it 'sets mask string' do
       @mask_strings.each_with_index do |str,len|
         hs = Iqeo::Hostspec.new "1.2.3.4/#{len}"
@@ -106,13 +99,6 @@ describe Iqeo::Hostspec do
         end 
       end 
 
-#      it 'sets ip integer' do
-#        @octets.each_cons(4) do |octets|
-#          hs = Iqeo::Hostspec.new octets.join('.')
-#          hs.ip_int.should eq (octets[0]*16777216 + octets[1]*65536 + octets[2]*256 + octets[3])
-#        end
-#      end
-
     end
 
     context 'being a hostname' do
@@ -128,14 +114,6 @@ describe Iqeo::Hostspec do
         hs.mask.should eq '255.255.255.255'
         hs.mask_length.should eq 32
       end
-
-      # it 'with mask resolves to network IP address' do
-      #   [32,24,16,8].each do |masklen|
-      #     hs = Iqeo::Hostspec.new("localhost/#{masklen}") 
-      #     hs.address_spec.collect(&:first).should eq [127,0,0,1]
-      #     hs.mask_length.should eq masklen
-      #   end
-      # end
   
     end
 
