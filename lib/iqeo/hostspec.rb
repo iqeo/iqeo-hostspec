@@ -21,6 +21,7 @@ module Iqeo
       rescue HostspecException
         parse_hostname host_str
       end
+      raise HostspecException, 'complex spec cannot have mask length' if @mask_specified && @address_spec.any? { |octet| octet.size > 1 }
       mask_address_spec
     end
 
@@ -36,6 +37,7 @@ module Iqeo
       if str.empty?
         @mask = '255.255.255.255'
         @mask_length = 32
+        @mask_specified = false
         return
       end
       if match = str.match( /^\d+$/ )
@@ -43,6 +45,7 @@ module Iqeo
         raise "bad mask length (#{@mask_length}), expected between 0 ad 32" unless @mask_length.between? 0,32
         mask_int = ((2**@mask_length)-1) << (32-@mask_length)
         @mask = [24,16,8,0].collect { |n| ( mask_int & ( 255 << n ) ) >> n }.join '.'
+        @mask_specified = true
       else
         raise "bad format, expected mask length after '/'"
       end

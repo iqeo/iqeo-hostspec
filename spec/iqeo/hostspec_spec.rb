@@ -274,9 +274,13 @@ describe Iqeo::Hostspec do
   
     end
 
-    context 'an IP address spec' do
+    context 'a complex IP address spec' do
 
-      it 'must not specify a mask length'
+      it 'must not specify a mask length' do
+        (0..32).each do |masklen|
+          expect { hs = Iqeo::Hostspec.new "10.20,22,24.30-39.40/#{masklen}" }.to raise_error
+        end
+      end
       
       it 'may specify octet values with commas' do
         hs = Iqeo::Hostspec.new '10,11,12.20,21,22.30,31,32.40,41,42'
