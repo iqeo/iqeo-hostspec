@@ -270,7 +270,12 @@ describe Iqeo::Hostspec do
         hs.mask_length.should eq 32
       end
 
-      it 'may specify address range with a mask length'
+      it 'may specify address range with a mask length' do
+        (0..32).each do |masklen|
+          hs = Iqeo::Hostspec.new("localhost/#{masklen}")
+          hs.mask_length.should eq masklen
+        end
+      end
   
     end
 
