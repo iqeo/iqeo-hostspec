@@ -331,45 +331,45 @@ describe Iqeo::Hostspec do
   end
 
   context 'instance' do
-    
-    context '.each_address enumerates' do
 
-      before(:all) do
-        @octets = (0..255).to_a
-        @multi_spec_with_commas = '10,11,12.20,21,22.30,31,32.40,41,42'
-        @multi_spec_with_dashes = '10-12.20-22.30-32.40-42'
-        @multi_expected_addresses = [
-          '10.20.30.40','10.20.30.41','10.20.30.42','10.20.31.40','10.20.31.41','10.20.31.42','10.20.32.40','10.20.32.41','10.20.32.42',
-          '10.21.30.40','10.21.30.41','10.21.30.42','10.21.31.40','10.21.31.41','10.21.31.42','10.21.32.40','10.21.32.41','10.21.32.42',
-          '10.22.30.40','10.22.30.41','10.22.30.42','10.22.31.40','10.22.31.41','10.22.31.42','10.22.32.40','10.22.32.41','10.22.32.42',
-          '11.20.30.40','11.20.30.41','11.20.30.42','11.20.31.40','11.20.31.41','11.20.31.42','11.20.32.40','11.20.32.41','11.20.32.42',
-          '11.21.30.40','11.21.30.41','11.21.30.42','11.21.31.40','11.21.31.41','11.21.31.42','11.21.32.40','11.21.32.41','11.21.32.42',
-          '11.22.30.40','11.22.30.41','11.22.30.42','11.22.31.40','11.22.31.41','11.22.31.42','11.22.32.40','11.22.32.41','11.22.32.42',
-          '12.20.30.40','12.20.30.41','12.20.30.42','12.20.31.40','12.20.31.41','12.20.31.42','12.20.32.40','12.20.32.41','12.20.32.42',
-          '12.21.30.40','12.21.30.41','12.21.30.42','12.21.31.40','12.21.31.41','12.21.31.42','12.21.32.40','12.21.32.41','12.21.32.42',
-          '12.22.30.40','12.22.30.41','12.22.30.42','12.22.31.40','12.22.31.41','12.22.31.42','12.22.32.40','12.22.32.41','12.22.32.42',
+    before(:all) do
+      @octets = (0..255).to_a
+      @multi_spec_with_commas = '10,11,12.20,21,22.30,31,32.40,41,42'
+      @multi_spec_with_dashes = '10-12.20-22.30-32.40-42'
+      @multi_expected_addresses = [
+        '10.20.30.40','10.20.30.41','10.20.30.42','10.20.31.40','10.20.31.41','10.20.31.42','10.20.32.40','10.20.32.41','10.20.32.42',
+        '10.21.30.40','10.21.30.41','10.21.30.42','10.21.31.40','10.21.31.41','10.21.31.42','10.21.32.40','10.21.32.41','10.21.32.42',
+        '10.22.30.40','10.22.30.41','10.22.30.42','10.22.31.40','10.22.31.41','10.22.31.42','10.22.32.40','10.22.32.41','10.22.32.42',
+        '11.20.30.40','11.20.30.41','11.20.30.42','11.20.31.40','11.20.31.41','11.20.31.42','11.20.32.40','11.20.32.41','11.20.32.42',
+        '11.21.30.40','11.21.30.41','11.21.30.42','11.21.31.40','11.21.31.41','11.21.31.42','11.21.32.40','11.21.32.41','11.21.32.42',
+        '11.22.30.40','11.22.30.41','11.22.30.42','11.22.31.40','11.22.31.41','11.22.31.42','11.22.32.40','11.22.32.41','11.22.32.42',
+        '12.20.30.40','12.20.30.41','12.20.30.42','12.20.31.40','12.20.31.41','12.20.31.42','12.20.32.40','12.20.32.41','12.20.32.42',
+        '12.21.30.40','12.21.30.41','12.21.30.42','12.21.31.40','12.21.31.41','12.21.31.42','12.21.32.40','12.21.32.41','12.21.32.42',
+        '12.22.30.40','12.22.30.41','12.22.30.42','12.22.31.40','12.22.31.41','12.22.31.42','12.22.32.40','12.22.32.41','12.22.32.42',
+      ]
+      @specs_with_slash = {
+        '10.20.30.40/28' => [
+          '10.20.30.32', '10.20.30.33', '10.20.30.34', '10.20.30.35', '10.20.30.36', '10.20.30.37', '10.20.30.38', '10.20.30.39',
+          '10.20.30.40', '10.20.30.41', '10.20.30.42', '10.20.30.43', '10.20.30.44', '10.20.30.45', '10.20.30.46', '10.20.30.47',
+        ],
+        '10.20.30.40/27' => [
+          '10.20.30.32', '10.20.30.33', '10.20.30.34', '10.20.30.35', '10.20.30.36', '10.20.30.37', '10.20.30.38', '10.20.30.39',
+          '10.20.30.40', '10.20.30.41', '10.20.30.42', '10.20.30.43', '10.20.30.44', '10.20.30.45', '10.20.30.46', '10.20.30.47',
+          '10.20.30.48', '10.20.30.49', '10.20.30.50', '10.20.30.51', '10.20.30.52', '10.20.30.53', '10.20.30.54', '10.20.30.55',
+          '10.20.30.56', '10.20.30.57', '10.20.30.58', '10.20.30.59', '10.20.30.60', '10.20.30.61', '10.20.30.62', '10.20.30.63',
         ]
-        @specs_with_slash = {
-          '10.20.30.40/28' => [
-            '10.20.30.32', '10.20.30.33', '10.20.30.34', '10.20.30.35', '10.20.30.36', '10.20.30.37', '10.20.30.38', '10.20.30.39',
-            '10.20.30.40', '10.20.30.41', '10.20.30.42', '10.20.30.43', '10.20.30.44', '10.20.30.45', '10.20.30.46', '10.20.30.47',
-          ],
-          '10.20.30.40/27' => [
-            '10.20.30.32', '10.20.30.33', '10.20.30.34', '10.20.30.35', '10.20.30.36', '10.20.30.37', '10.20.30.38', '10.20.30.39',
-            '10.20.30.40', '10.20.30.41', '10.20.30.42', '10.20.30.43', '10.20.30.44', '10.20.30.45', '10.20.30.46', '10.20.30.47',
-            '10.20.30.48', '10.20.30.49', '10.20.30.50', '10.20.30.51', '10.20.30.52', '10.20.30.53', '10.20.30.54', '10.20.30.55',
-            '10.20.30.56', '10.20.30.57', '10.20.30.58', '10.20.30.59', '10.20.30.60', '10.20.30.61', '10.20.30.62', '10.20.30.63',
-          ]
-        }
+      }
 
-      end
+    end
 
+    shared_examples "enumerates" do |method|
+        
       it 'a single address for host address' do
         @octets.each_cons(4) do |octets|
           address = octets.join('.')
           hs = Iqeo::Hostspec.new address
           address_count = 0
-          hs.each_address do |address_str|
+          hs.send(method) do |address_str|
             address_str.should eq address
             address_count += 1
           end
@@ -380,7 +380,7 @@ describe Iqeo::Hostspec do
       it 'multiple addresses for a spec with multiple octet values (commas)' do
         hs = Iqeo::Hostspec.new @multi_spec_with_commas
         address_count = 0
-        hs.each_address do |address_str|
+        hs.send(method) do |address_str|
           address_str.should eq @multi_expected_addresses[address_count]
           address_count +=1
         end
@@ -390,7 +390,7 @@ describe Iqeo::Hostspec do
       it 'multiple addresses for a spec with octet ranges (dashes)' do
         hs = Iqeo::Hostspec.new @multi_spec_with_dashes
         address_count = 0
-        hs.each_address do |address_str|
+        hs.send(method) do |address_str|
           address_str.should eq @multi_expected_addresses[address_count]
           address_count +=1
         end
@@ -401,7 +401,7 @@ describe Iqeo::Hostspec do
         @specs_with_slash.each do |address_spec,expected_addresses|
           hs = Iqeo::Hostspec.new address_spec
           address_count = 0
-          hs.each_address do |address_str|
+          hs.send(method) do |address_str|
             address_str.should eq expected_addresses[address_count]
             address_count += 1
           end
@@ -411,7 +411,51 @@ describe Iqeo::Hostspec do
 
     end
 
-    it 'is enumerable'
+    context '.each_address enumerates' do
+      include_examples 'enumerates', :each_address
+    end
+
+    context '.each enumerates' do
+      include_examples 'enumerates', :each
+    end
+
+    context 'enumerable' do
+      
+      it '.each returns an Enumerator' do
+        hs = Iqeo::Hostspec.new '10.20.30.40/24'
+        hs.each.class.should eq Enumerator
+      end
+
+      it 'responds to Enumerable methods' do
+        hs = Iqeo::Hostspec.new '10.20.30.40/24'
+        hs.all? { |i| i.start_with? '10' }.should be_true
+        hs.any? { |i| i.end_with? '255'  }.should be_true
+      end
+
+      it 'returns IP addresses in order' 
+        
+      it 'can calculate size for simple specs' do
+        (0..32).each do |masklen|
+          hs = Iqeo::Hostspec.new "10.20.30.40/#{masklen}"
+          hs.size.should eq 2**(32-masklen)
+        end
+      end
+
+      it 'can calculate size for complex specs' do
+        hs = Iqeo::Hostspec.new @multi_spec_with_commas
+        hs.size.should eq @multi_expected_addresses.size
+        hs = Iqeo::Hostspec.new @multi_spec_with_dashes
+        hs.size.should eq @multi_expected_addresses.size
+      end
+
+      it 'Enumerator can make use of size' do
+        hs = Iqeo::Hostspec.new '1.1.1.1-10'
+        hs.size.should eq 10
+        enumerator = hs.each
+        enumerator.size.should eq 10
+      end
+
+    end
 
   end
 

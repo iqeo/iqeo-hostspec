@@ -8,6 +8,8 @@ module Iqeo
 
     VERSION = '0.0.1'
 
+    include Enumerable
+
     attr_reader :string, :mask, :mask_length, :address_spec, :hostname
 
     def initialize spec_str
@@ -126,11 +128,24 @@ module Iqeo
     end
 
     def each_address 
-      recursively_iterate_octets do |address_str|
-        yield address_str
+      if block_given?
+        recursively_iterate_octets do |address_str|
+          yield address_str
+        end
+      else
+        return to_enum( :each_address ) { size }
       end
     end
   
+    alias_method :each, :each_address
+
+    def size
+      if @mask_length == 32
+        @address_spec.inject(1) { |oc,o| oc * o.inject(0) { |vc,v| vc + ( v.respond_to?(:each) ? v.size : 1 ) } }
+      else
+        2**(32-@mask_length)
+      end
+    end
   end
 
 end
