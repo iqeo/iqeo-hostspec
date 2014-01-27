@@ -258,8 +258,12 @@ describe Iqeo::Hostspec do
 
     context 'a hostname' do
 
-      it 'is assumed when not an IP address' do
+      it 'is assumed when not a simple IP spec' do
         Iqeo::Hostspec.new('localhost').hostname.should eq 'localhost'
+      end
+
+      it 'is assumed when not a complex IP spec' do
+        expect { hs = Iqeo::Hostspec.new "1.2.3.100-300" }.to raise_error Resolv::ResolvError 
       end
 
       it 'resolves to a host IP address' do
@@ -280,8 +284,6 @@ describe Iqeo::Hostspec do
     end
 
     context 'a complex IP address spec' do
-
-      it 'must only specify octet values in range 0 to 255 ?'
 
       it 'must not specify a mask length' do
         (0..32).each do |masklen|
@@ -326,6 +328,10 @@ describe Iqeo::Hostspec do
       it 'may combine octet specification with dashes and commas' do
         hs = Iqeo::Hostspec.new '0,1,10,100-200,250,254,255.-50,99,200-.-33,44,55-66,77,88-.-'
         hs.address_spec.should eq [[0,1,10,100..200,250,254,255],[0..50,99,200..255],[0..33,44,55..66,77,88..255],[0..255]]
+      end
+
+      it 'may not specifiy a reversed range' do
+        expect { hs = Iqeo::Hostspec.new '1.1.1.20-10' }.to raise_error
       end
     
     end

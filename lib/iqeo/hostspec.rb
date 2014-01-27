@@ -1,3 +1,5 @@
+require 'resolv'
+
 module Iqeo
 
   class HostspecException < Exception ; end
@@ -91,17 +93,25 @@ module Iqeo
       numbers = str.split '-', -1 # maximize return fields to distinguish 'n' from '-m'
       case numbers.size
       when 1 then
-        number = numbers[0]
-        match = number.match /^(25[0-5]|2[0-4]\d|[0-1]\d\d|\d\d|\d)$/
-        raise HostspecException, 'bad ip, invalid octet' unless match
-        number.to_i
+        check_octet_value numbers[0]
+        numbers[0].to_i
       when 2 then
         numbers[0] =   '0' if numbers[0].empty?
         numbers[1] = '255' if numbers[1].empty?
-        numbers[0].to_i..numbers[1].to_i
+        check_octet_value numbers[0]
+        check_octet_value numbers[1]
+        range_start = numbers[0].to_i
+        range_finish = numbers[1].to_i
+        raise HostspecException, "bad ip, reversed range in octet value: #{str}" if range_start > range_finish
+        range_start..range_finish
       else
-        raise HostspecException, 'bad ip, invalid octet'
+        raise HostspecException, "bad ip, invalid octet value: #{str}"
       end
+    end
+
+    def check_octet_value str
+      match = str.match /^(25[0-5]|2[0-4]\d|[0-1]\d\d|\d\d|\d)$/
+      raise HostspecException, "bad ip, octet value is not a number in 0-255: #{str}" unless match
     end
 
     def parse_hostname str
