@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 module Iqeo
 
   class HostspecException < Exception ; end
@@ -146,6 +144,25 @@ module Iqeo
         2**(32-@mask_length)
       end
     end
+
+    def min
+      first
+    end
+
+    def last
+      address = nil
+      each { |addr| address = addr }
+      address
+    end
+
+    def max
+      last
+    end
+
+    def minmax
+      [first,last]
+    end
+
   end
 
 end

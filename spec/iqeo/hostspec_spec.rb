@@ -281,6 +281,8 @@ describe Iqeo::Hostspec do
 
     context 'a complex IP address spec' do
 
+      it 'must only specify octet values in range 0 to 255 ?'
+
       it 'must not specify a mask length' do
         (0..32).each do |masklen|
           expect { hs = Iqeo::Hostspec.new "10.20,22,24.30-39.40/#{masklen}" }.to raise_error
@@ -432,8 +434,6 @@ describe Iqeo::Hostspec do
         hs.any? { |i| i.end_with? '255'  }.should be_true
       end
 
-      it 'returns IP addresses in order' 
-        
       it 'can calculate size for simple specs' do
         (0..32).each do |masklen|
           hs = Iqeo::Hostspec.new "10.20.30.40/#{masklen}"
@@ -453,6 +453,31 @@ describe Iqeo::Hostspec do
         hs.size.should eq 10
         enumerator = hs.each
         enumerator.size.should eq 10
+      end
+
+      it 'has first (from enumerable)' do
+        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs.first.should eq '1.1.2.20'
+      end
+      
+      it 'has last' do
+        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs.last.should eq '1.1.10.100'
+      end
+
+      it 'has min equals first' do
+        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs.min.should eq '1.1.2.20'
+      end
+
+      it 'has max equals last' do
+        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs.max.should eq '1.1.10.100'
+      end
+
+      it 'has minmax' do
+        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs.minmax.should eq ['1.1.2.20','1.1.10.100']
       end
 
     end
