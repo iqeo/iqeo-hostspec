@@ -1,5 +1,4 @@
 require 'iqeo/hostspec'
-require 'awesome_print'
 
 describe Iqeo::Hostspec do
 

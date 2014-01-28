@@ -1,0 +1,29 @@
+#! /usr/bin/env ruby
+
+require 'iqeo/hostspec'
+
+class Runner
+
+  def self.run spec, cmd, out=$stdout, err=$stderr
+    return 1 unless spec
+    spec.strip! if spec
+    cmd.strip! if cmd
+    begin
+      host_spec = Iqeo::Hostspec.new spec
+    rescue Exception => e
+      err.puts e.message
+      # print usage ?
+      return 2
+    end
+    if cmd.nil? || cmd.empty?
+      host_spec.each { |address| out.puts address }
+    end
+    0
+  end
+  
+end
+
+if __FILE__ == $0
+  exit Runner.run ARGV[0], ARGV[1]
+end
+
