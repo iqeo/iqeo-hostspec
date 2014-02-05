@@ -5,32 +5,40 @@ require_relative '../lib/iqeo/hostspec'
 
 class Runner
 
-  def self.run spec, cmd, out=$stdout, err=$stderr
-    return 1 unless spec
-    spec = spec.strip if spec
-    cmd = cmd.strip if cmd
-    begin
-      host_spec = Iqeo::Hostspec.new spec
-    rescue Exception => e
-      err.puts e.message
-      # print usage ?
-      return 2
+  def self.run args, out: $stdout, err: $stderr
+    if args.empty? || args.include?('-h') || args.include?('--help')
+      help err
+      return 1
     end
-    if cmd.nil? || cmd.empty?
-      host_spec.each { |address| out.puts address }
-    else
-      env = {
-        'HOSTSPEC_MASK'    => host_spec.mask,
-        'HOSTSPEC_MASKLEN' => host_spec.mask_length.to_s,
-        'HOSTSPEC_COUNT'   => host_spec.size.to_s
-      }
-      host_spec.each_with_index do |address,index|
-        env['HOSTSPEC_IP']    = address
-        env['HOSTSPEC_INDEX'] = (index+1).to_s
-        system( env, cmd )
+    cmd = nil # cmd.strip if cmd
+    args.each do |spec|
+      spec = spec.strip
+      begin
+        host_spec = Iqeo::Hostspec.new spec
+      rescue Exception => e
+        err.puts e.message
+        return 2
+      end
+      if cmd.nil? || cmd.empty?
+        host_spec.each { |address| out.puts address }
+      else
+        env = {
+          'HOSTSPEC_MASK'    => host_spec.mask,
+          'HOSTSPEC_MASKLEN' => host_spec.mask_length.to_s,
+          'HOSTSPEC_COUNT'   => host_spec.size.to_s
+        }
+        host_spec.each_with_index do |address,index|
+          env['HOSTSPEC_IP']    = address
+          env['HOSTSPEC_INDEX'] = (index+1).to_s
+          system( env, cmd )
+        end
       end
     end
     0
+  end
+
+  def self.help io
+    io.puts 'something about hostspec usage'
   end
   
 end
