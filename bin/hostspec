@@ -6,12 +6,23 @@ require_relative '../lib/iqeo/hostspec'
 class Runner
 
   def self.run args, out: $stdout, err: $stderr
+
     if args.empty? || args.include?('-h') || args.include?('--help')
       help err
       return 1
     end
-    cmd = nil # cmd.strip if cmd
-    args.each do |spec|
+
+    cmd_sw_index = args.index('-c') || args.index('--cmd')
+    if cmd_sw_index
+      specs = args.take(cmd_sw_index)
+      cmd   = args[cmd_sw_index+1]
+      return 3 if cmd.nil? || cmd.strip.empty?
+    else 
+      specs = args
+      cmd = nil
+    end
+    
+    specs.each do |spec|
       spec = spec.strip
       begin
         host_spec = Iqeo::Hostspec.new spec
