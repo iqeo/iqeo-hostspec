@@ -1,7 +1,6 @@
 #! /usr/bin/env ruby
 
-require 'open3'
-require_relative '../lib/iqeo/hostspec'
+require 'iqeo/hostspec'
 
 class Runner
 
@@ -24,9 +23,9 @@ class Runner
 
     cmd_sw_index = args.index('-c') || args.index('--cmd')
     if cmd_sw_index
-      specs = args.take(cmd_sw_index)
-      cmd   = args[cmd_sw_index+1]
-      if cmd.nil? || cmd.strip.empty?
+      specs = args.take(cmd_sw_index)            # specs are before switch
+      cmd   = args.drop(cmd_sw_index+1).join ' ' # command components are after switch, join into string to pass to subshell
+      if cmd.empty?
         err.puts "Error: No command given"
         return 2
       end
@@ -35,6 +34,7 @@ class Runner
       cmd = nil
     end
     
+    results = []
     specs.each do |spec|
       spec = spec.strip
       begin
@@ -43,7 +43,7 @@ class Runner
         err.puts "Error: #{e.message}"
         return 3
       end
-      if cmd.nil? || cmd.empty?
+      if cmd.nil?
         host_spec.each { |address| out.puts address }
       else
         env = {
@@ -54,11 +54,12 @@ class Runner
         host_spec.each_with_index do |address,index|
           env['HOSTSPEC_IP']    = address
           env['HOSTSPEC_INDEX'] = (index+1).to_s
-          system( env, cmd )
+          # this uses posix 'sh', to use bash user's cmd should be 'bash -c "echo \$HOSTSPEC_IP"' and deal with the weird nested quoting
+          results << system( env, cmd )
         end
       end
     end
-    0
+    ( results.empty? || results.all? ) ? 0 : 4
   end
 
   def self.print_help io
@@ -88,7 +89,8 @@ class Runner
     io.puts "Command:"
     io.puts "  A command to execute for each IP address may be specified following the command switch ( -c / --cmd )."
     io.puts "  The command is executed in a separate shell for each IP address."
-    io.puts "  Environment variables are provided with values for each IP address command execution:"
+    io.puts "  Environment variables are provided with values for each IP address command execution."
+    io.puts "  Quote these variables in the command to prevent substitution by the current shell."
     io.puts "    $HOSTSPEC_IP      : IP address"
     io.puts "    $HOSTSPEC_MASK    : Mask (255.255.255.255 if a mask length was not specified)"
     io.puts "    $HOSTSPEC_MASKLEN : Mask length (32 if a mask length was not specified)"
@@ -96,7 +98,7 @@ class Runner
     io.puts "    $HOSTSPEC_INDEX   : Index of IP address (from 1 to Count)"
     io.puts "  Examples:"
     io.puts "    Print IP addresses and mask length with index and count:"
-    io.puts "      hostspec 1.1.1.1-3 --cmd 'echo $HOSTSPEC_INDEX of $HOSTSPECT_COUNT : $HOSTSPEC_IP/$HOSTSPEC_MASKLEN'"
+    io.puts "      hostspec 1.1.1.1-3 --cmd echo '$HOSTSPEC_INDEX' of '$HOSTSPECT_COUNT' : '$HOSTSPEC_IP/$HOSTSPEC_MASKLEN'"
     io.puts "      ..."
     io.puts "      1 of 3 : 1.1.1.1/24"
     io.puts "      2 of 3 : 1.1.1.2/24"
@@ -104,12 +106,12 @@ class Runner
     io.puts "    Collect routing tables of all hosts on a network via ssh:"
     io.puts "      hostspec 1.1.1.1-254 --cmd 'ssh me@$HOSTSPEC_IP route -n'"
     io.puts "    Collect default web pages from all servers on a network via curl:"
-    io.puts "      hostspec 1.1.1.1-254 --cmd 'curl -o $HOSTSPEC_IP.html http://$HOSTSPEC_IP'"
+    io.puts "      hostspec 1.1.1.1-254 --cmd curl -o '$HOSTSPEC_IP.html' 'http://$HOSTSPEC_IP'"
     io.puts "    Collect IP configuration info from multiple windows systems (run from a windows system):"
-    io.puts "      hostspec 1.1.1.1-254 --cmd 'psexec \\$HOSTSPEC_IP ipconfig /all'"
+    io.puts "      hostspec 1.1.1.1-254 --cmd psexec '\\%HOSTSPEC_IP%' ipconfig /all"
     io.puts "    Collect IP configuration info from multiple windows systems (run from a linux system with kerberos):"
-    io.puts "      hostspec 1.1.1.1-254 --cmd 'winexe --kerberos yes //$(dig -x $HOSTSPEC_IP +short) ipconfig /all'"
-    io.puts "    Or any task that you would have to execute individually on multiple systems."
+    io.puts "      hostspec 1.1.1.1-254 --cmd winexe --kerberos yes //$(dig -x '$HOSTSPEC_IP' +short) ipconfig /all"
+    io.puts "    ...or any task that you would have to execute individually on multiple systems."
     io.puts
     io.puts "Options:"
     io.puts "  -h / --help     : Display this helpful information"
