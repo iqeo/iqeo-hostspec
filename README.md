@@ -1,6 +1,7 @@
 # Iqeo::Hostspec
 
 [![Gem Version](https://badge.fury.io/rb/iqeo-hostspec.png)](http://badge.fury.io/rb/iqeo-hostspec)
+[![Build Status](https://travis-ci.org/iqeo/iqeo-hostspec.png?branch=master)](https://travis-ci.org/iqeo/iqeo-hostspec)
 
 TODO: Write a gem description
 
