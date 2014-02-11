@@ -258,7 +258,7 @@ describe Iqeo::Hostspec do
     context 'a hostname' do
 
       it 'is assumed when not a simple IP spec' do
-        Iqeo::Hostspec.new('localhost').hostname.should eq 'localhost'
+        Iqeo::Hostspec.new('localhost.iqeo.net').hostname.should eq 'localhost.iqeo.net'
       end
 
       it 'is assumed when not a complex IP spec' do
@@ -266,8 +266,8 @@ describe Iqeo::Hostspec do
       end
 
       it 'resolves to a host IP address' do
-        hs = Iqeo::Hostspec.new('localhost') 
-        hs.hostname.should eq 'localhost'
+        hs = Iqeo::Hostspec.new('localhost.iqeo.net') 
+        hs.hostname.should eq 'localhost.iqeo.net'
         hs.address_spec.collect(&:first).should eq [127,0,0,1]
         hs.mask.should eq '255.255.255.255'
         hs.mask_length.should eq 32
@@ -275,7 +275,7 @@ describe Iqeo::Hostspec do
 
       it 'may specify address range with a mask length' do
         (0..32).each do |masklen|
-          hs = Iqeo::Hostspec.new("localhost/#{masklen}")
+          hs = Iqeo::Hostspec.new("localhost.iqeo.net/#{masklen}")
           hs.mask_length.should eq masklen
         end
       end

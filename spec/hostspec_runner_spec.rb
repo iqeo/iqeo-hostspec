@@ -15,13 +15,13 @@ describe Runner do
     Runner.run( ['10.20.30.40'],                out: StringIO.new, err: StringIO.new ).should eq 0
     Runner.run( ['10.20.30.40/24'],             out: StringIO.new, err: StringIO.new ).should eq 0
     Runner.run( ['10,11.20-29.30,31-38,39.40'], out: StringIO.new, err: StringIO.new ).should eq 0
-    Runner.run( ['localhost'],                  out: StringIO.new, err: StringIO.new ).should eq 0
+    Runner.run( ['localhost.iqeo.net'],                  out: StringIO.new, err: StringIO.new ).should eq 0
   end
 
   it 'accepts multiple host specs for arguments with no switches' do
     Runner.run( ['10.20.30.40/24','11.22.33.44'],                out: StringIO.new, err: StringIO.new ).should eq 0
     Runner.run( ['10,11.20-29.30,31-38,39.40','11.22.33.44/28'], out: StringIO.new, err: StringIO.new ).should eq 0
-    Runner.run( ['localhost','1.2.3.4/26','11.22.33.44-55'],     out: StringIO.new, err: StringIO.new ).should eq 0
+    Runner.run( ['localhost.iqeo.net','1.2.3.4/26','11.22.33.44-55'],     out: StringIO.new, err: StringIO.new ).should eq 0
   end
 
   it 'expects valid single host spec or prints error' do
