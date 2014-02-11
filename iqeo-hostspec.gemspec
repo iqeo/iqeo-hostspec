@@ -1,12 +1,12 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('../lib/', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-#require_relative 'lib/iqeo/hostspec/version'
+require 'iqeo/hostspec'
 
 Gem::Specification.new do |spec|
 
   spec.name          = "iqeo-hostspec"
-  spec.version       = '0.0.1' # Iqeo::Hostspec::VERSION
+  spec.version       = Iqeo::Hostspec::VERSION
   spec.authors       = ["Gerard Fowley"]
   spec.email         = ["gerard.fowley@iqeo.net"]
   spec.description   = %q{Write a gem description}
