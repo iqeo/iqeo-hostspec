@@ -1,4 +1,5 @@
 load './bin/hostspec'
+include Iqeo::Hostspec
 
 require 'stringio'
 

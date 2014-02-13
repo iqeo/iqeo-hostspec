@@ -1,21 +1,22 @@
 require 'iqeo/hostspec'
+include Iqeo::Hostspec
 
-describe Iqeo::Hostspec do
+describe Hostspec do
 
   context '.new' do
 
     it 'accepts a single argument only' do
-      expect { Iqeo::Hostspec.new                     }.to     raise_error
-      expect { Iqeo::Hostspec.new "1.1.1.1"           }.to_not raise_error
-      expect { Iqeo::Hostspec.new "1.1.1.1","2.2.2.2" }.to     raise_error
+      expect { Hostspec.new                     }.to     raise_error
+      expect { Hostspec.new "1.1.1.1"           }.to_not raise_error
+      expect { Hostspec.new "1.1.1.1","2.2.2.2" }.to     raise_error
     end
 
     it 'does not require a mask length' do
-      expect { Iqeo::Hostspec.new "3.3.3.3" }.to_not raise_error
+      expect { Hostspec.new "3.3.3.3" }.to_not raise_error
     end
 
     it 'defaults to a host mask when none specified' do
-      hs = Iqeo::Hostspec.new "4.4.4.4"
+      hs = Hostspec.new "4.4.4.4"
       hs.mask.should eq '255.255.255.255'
       hs.mask_length.should eq 32
     end
@@ -50,27 +51,27 @@ describe Iqeo::Hostspec do
     end
 
     it 'is specified numerically after /' do
-      expect { Iqeo::Hostspec.new "5.5.5.5/24"  }.to_not raise_error
-      expect { Iqeo::Hostspec.new "5.5.5.5/"    }.to     raise_error
-      expect { Iqeo::Hostspec.new "5.5.5.5/xyz" }.to     raise_error
+      expect { Hostspec.new "5.5.5.5/24"  }.to_not raise_error
+      expect { Hostspec.new "5.5.5.5/"    }.to     raise_error
+      expect { Hostspec.new "5.5.5.5/xyz" }.to     raise_error
     end
 
     it 'is between 0 and 32' do
       (0..32).each do |masklen|
-        hs = Iqeo::Hostspec.new "1.2.3.4/#{masklen}"
+        hs = Hostspec.new "1.2.3.4/#{masklen}"
         hs.mask_length.should eq masklen
       end
     end
 
     it 'cannot be > 32' do
       [ 33, 100, 1000 ].each do |masklen|
-        expect { Iqeo::Hostspec.new "1.2.3.4/#{masklen}" }.to raise_error
+        expect { Hostspec.new "1.2.3.4/#{masklen}" }.to raise_error
       end
     end
 
     it 'sets mask string' do
       @mask_strings.each_with_index do |str,len|
-        hs = Iqeo::Hostspec.new "1.2.3.4/#{len}"
+        hs = Hostspec.new "1.2.3.4/#{len}"
         hs.mask.should eq str
       end
     end
@@ -84,8 +85,8 @@ describe Iqeo::Hostspec do
     end
 
     it 'cannot be empty' do
-      expect { Iqeo::Hostspec.new ''    }.to raise_error
-      expect { Iqeo::Hostspec.new '/32' }.to raise_error
+      expect { Hostspec.new ''    }.to raise_error
+      expect { Hostspec.new '/32' }.to raise_error
     end
 
     context 'an IP address' do
@@ -93,7 +94,7 @@ describe Iqeo::Hostspec do
       it 'may specify a single host without a mask length' do
         @octets.each_cons(4) do |octets|
           address = octets.join('.')
-          hs = Iqeo::Hostspec.new address
+          hs = Hostspec.new address
           hs.address_spec.collect(&:first).should eq octets
         end 
       end 
@@ -107,7 +108,7 @@ describe Iqeo::Hostspec do
           '1.1.1.1/0'  => [[0..255],[0..255],[0..255],[0..255]]
         }
         slash_specs.each do |spec_str,spec_data|
-          hs = Iqeo::Hostspec.new spec_str
+          hs = Hostspec.new spec_str
           hs.address_spec.should eq spec_data
         end
       end
@@ -248,7 +249,7 @@ describe Iqeo::Hostspec do
           '255.255.255.255/0'  => [[0..255]  ,[0..255],[0..255],[0..255]],
         }
         slash_specs.each do |spec_str,spec_data|
-          hs = Iqeo::Hostspec.new spec_str
+          hs = Hostspec.new spec_str
           hs.address_spec.should eq spec_data
         end
       end
@@ -258,15 +259,15 @@ describe Iqeo::Hostspec do
     context 'a hostname' do
 
       it 'is assumed when not a simple IP spec' do
-        Iqeo::Hostspec.new('localhost.iqeo.net').hostname.should eq 'localhost.iqeo.net'
+        Hostspec.new('localhost.iqeo.net').hostname.should eq 'localhost.iqeo.net'
       end
 
       it 'is assumed when not a complex IP spec' do
-        expect { hs = Iqeo::Hostspec.new "1.2.3.100-300" }.to raise_error Resolv::ResolvError 
+        expect { hs = Hostspec.new "1.2.3.100-300" }.to raise_error Resolv::ResolvError 
       end
 
       it 'resolves to a host IP address' do
-        hs = Iqeo::Hostspec.new('localhost.iqeo.net') 
+        hs = Hostspec.new('localhost.iqeo.net') 
         hs.hostname.should eq 'localhost.iqeo.net'
         hs.address_spec.collect(&:first).should eq [127,0,0,1]
         hs.mask.should eq '255.255.255.255'
@@ -275,7 +276,7 @@ describe Iqeo::Hostspec do
 
       it 'may specify address range with a mask length' do
         (0..32).each do |masklen|
-          hs = Iqeo::Hostspec.new("localhost.iqeo.net/#{masklen}")
+          hs = Hostspec.new("localhost.iqeo.net/#{masklen}")
           hs.mask_length.should eq masklen
         end
       end
@@ -286,51 +287,51 @@ describe Iqeo::Hostspec do
 
       it 'must not specify a mask length' do
         (0..32).each do |masklen|
-          expect { hs = Iqeo::Hostspec.new "10.20,22,24.30-39.40/#{masklen}" }.to raise_error
+          expect { hs = Hostspec.new "10.20,22,24.30-39.40/#{masklen}" }.to raise_error
         end
       end
       
       it 'may specify octet values with commas' do
-        hs = Iqeo::Hostspec.new '10,11,12.20,21,22.30,31,32.40,41,42'
+        hs = Hostspec.new '10,11,12.20,21,22.30,31,32.40,41,42'
         hs.address_spec.should eq [[10,11,12],[20,21,22],[30,31,32],[40,41,42]]
       end
       
       context 'may specify octet value ranges with dashes' do
 
         it 'in form "n-m"' do
-          hs = Iqeo::Hostspec.new '10-19.20-29.30-39.40-49'
+          hs = Hostspec.new '10-19.20-29.30-39.40-49'
           hs.address_spec.should eq [[10..19],[20..29],[30..39],[40..49]]
         end  
 
         it 'in form "n-"' do
-          hs = Iqeo::Hostspec.new '10-.20-.30-.40-'
+          hs = Hostspec.new '10-.20-.30-.40-'
           hs.address_spec.should eq [[10..255],[20..255],[30..255],[40..255]]
         end  
       
         it 'in form "-m"' do
-          hs = Iqeo::Hostspec.new '-19.-29.-39.-49'
+          hs = Hostspec.new '-19.-29.-39.-49'
           hs.address_spec.should eq [[0..19],[0..29],[0..39],[0..49]]
         end  
         
         it 'in form "-"' do
-          hs = Iqeo::Hostspec.new '-.-.-.-'
+          hs = Hostspec.new '-.-.-.-'
           hs.address_spec.should eq [[0..255],[0..255],[0..255],[0..255]]
         end  
       
       end
 
       it 'may mix octet specifications with dashes and commas' do
-        hs = Iqeo::Hostspec.new '1,10,100,200.13-247.23-.-99'
+        hs = Hostspec.new '1,10,100,200.13-247.23-.-99'
         hs.address_spec.should eq [[1,10,100,200],[13..247],[23..255],[0..99]]
       end
 
       it 'may combine octet specification with dashes and commas' do
-        hs = Iqeo::Hostspec.new '0,1,10,100-200,250,254,255.-50,99,200-.-33,44,55-66,77,88-.-'
+        hs = Hostspec.new '0,1,10,100-200,250,254,255.-50,99,200-.-33,44,55-66,77,88-.-'
         hs.address_spec.should eq [[0,1,10,100..200,250,254,255],[0..50,99,200..255],[0..33,44,55..66,77,88..255],[0..255]]
       end
 
       it 'may not specifiy a reversed range' do
-        expect { hs = Iqeo::Hostspec.new '1.1.1.20-10' }.to raise_error
+        expect { hs = Hostspec.new '1.1.1.20-10' }.to raise_error
       end
     
     end
@@ -374,7 +375,7 @@ describe Iqeo::Hostspec do
       it 'a single address for host address' do
         @octets.each_cons(4) do |octets|
           address = octets.join('.')
-          hs = Iqeo::Hostspec.new address
+          hs = Hostspec.new address
           address_count = 0
           hs.send(method) do |address_str|
             address_str.should eq address
@@ -385,7 +386,7 @@ describe Iqeo::Hostspec do
       end
 
       it 'multiple addresses for a spec with multiple octet values (commas)' do
-        hs = Iqeo::Hostspec.new @multi_spec_with_commas
+        hs = Hostspec.new @multi_spec_with_commas
         address_count = 0
         hs.send(method) do |address_str|
           address_str.should eq @multi_expected_addresses[address_count]
@@ -395,7 +396,7 @@ describe Iqeo::Hostspec do
       end
 
       it 'multiple addresses for a spec with octet ranges (dashes)' do
-        hs = Iqeo::Hostspec.new @multi_spec_with_dashes
+        hs = Hostspec.new @multi_spec_with_dashes
         address_count = 0
         hs.send(method) do |address_str|
           address_str.should eq @multi_expected_addresses[address_count]
@@ -406,7 +407,7 @@ describe Iqeo::Hostspec do
 
       it 'masked addresses for specs with a mask length' do
         @specs_with_slash.each do |address_spec,expected_addresses|
-          hs = Iqeo::Hostspec.new address_spec
+          hs = Hostspec.new address_spec
           address_count = 0
           hs.send(method) do |address_str|
             address_str.should eq expected_addresses[address_count]
@@ -429,59 +430,59 @@ describe Iqeo::Hostspec do
     context 'enumerable' do
       
       it '.each returns an Enumerator' do
-        hs = Iqeo::Hostspec.new '10.20.30.40/24'
+        hs = Hostspec.new '10.20.30.40/24'
         hs.each.class.should eq Enumerator
       end
 
       it 'responds to Enumerable methods' do
-        hs = Iqeo::Hostspec.new '10.20.30.40/24'
+        hs = Hostspec.new '10.20.30.40/24'
         hs.all? { |i| i.start_with? '10' }.should be_true
         hs.any? { |i| i.end_with? '255'  }.should be_true
       end
 
       it 'can calculate size for simple specs' do
         (0..32).each do |masklen|
-          hs = Iqeo::Hostspec.new "10.20.30.40/#{masklen}"
+          hs = Hostspec.new "10.20.30.40/#{masklen}"
           hs.size.should eq 2**(32-masklen)
         end
       end
 
       it 'can calculate size for complex specs' do
-        hs = Iqeo::Hostspec.new @multi_spec_with_commas
+        hs = Hostspec.new @multi_spec_with_commas
         hs.size.should eq @multi_expected_addresses.size
-        hs = Iqeo::Hostspec.new @multi_spec_with_dashes
+        hs = Hostspec.new @multi_spec_with_dashes
         hs.size.should eq @multi_expected_addresses.size
       end
 
       it 'Enumerator can make use of size' do
-        hs = Iqeo::Hostspec.new '1.1.1.1-10'
+        hs = Hostspec.new '1.1.1.1-10'
         hs.size.should eq 10
         enumerator = hs.each
         enumerator.size.should eq 10
       end
 
       it 'has first (from enumerable)' do
-        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs = Hostspec.new '1.1.2-10.20-100'
         hs.first.should eq '1.1.2.20'
       end
       
       it 'has last' do
-        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs = Hostspec.new '1.1.2-10.20-100'
         hs.last.should eq '1.1.10.100'
       end
 
       it 'has min equals first' do
-        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs = Hostspec.new '1.1.2-10.20-100'
         hs.min.should eq '1.1.2.20'
       end
 
       it 'has max equals last' do
-        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs = Hostspec.new '1.1.2-10.20-100'
         hs.max.should eq '1.1.10.100'
       end
 
       it 'has minmax' do
-        hs = Iqeo::Hostspec.new '1.1.2-10.20-100'
+        hs = Hostspec.new '1.1.2-10.20-100'
         hs.minmax.should eq ['1.1.2.20','1.1.10.100']
       end
 
