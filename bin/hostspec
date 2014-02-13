@@ -2,7 +2,5 @@
 
 require 'iqeo/hostspec'
 
-if __FILE__ == $0
-  exit Iqeo::Hostspec::Runner.run ARGV
-end
+exit Iqeo::Hostspec::Runner.run ARGV
 
