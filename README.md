@@ -4,37 +4,44 @@
 [![Build Status](https://travis-ci.org/iqeo/iqeo-hostspec.png?branch=master)](https://travis-ci.org/iqeo/iqeo-hostspec)
 
 A utility and Ruby library to generate lists of IP addresses from Nmap-style IP host specifications.
-
+```
 hostspec 1.0.0.1-3
 10.0.0.1
 10.0.0.2
 10.0.0.3
+```
 
-In addition to expanding host specs to a list, a command may be executed for each IP address. See Usage below.
+In addition to expanding host specs to a list, a command may be executed for each IP address. See Program Usage below.
 
 ## Installation
 
 Install a current version of Ruby from:
 
-'''
+```
 https://www.ruby-lang.org/en/installation/
-'''
+```
 
 Iqeo::Hostspec is packaged as a Ruby gem. To install, execute:
 
-'''
+```
 gem install iqeo-hostspec
-'''
+```
 
-## Usage
+To use the library in your own applications:
+
+```ruby
+require 'iqeo/hostspec'
+```
+
+## Program Usage
 
 For help with usage, execute:
 
-'''
+```
 hostspec --help
-'''
+```
 
-'''
+```
 Usage: hostspec [ options ] specs... [ [ -c / --cmd ] command ]
 
 Prints all IP addresses for IP host specifications (see Specs:).
@@ -89,5 +96,9 @@ Command:
 Options:
   -h / --help     : Display this helpful information
   -v / --version  : Display program version
-'''
+```
+
+## License
+
+Licensed under GPLv3, see LICENSE.txt.
 
