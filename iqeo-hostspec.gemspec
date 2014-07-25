@@ -9,8 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = Iqeo::Hostspec::VERSION
   spec.authors       = ["Gerard Fowley"]
   spec.email         = ["gerard.fowley@iqeo.net"]
-  spec.description   = %q{Write a gem description}
-  spec.summary       = %q{Write a gem summary}
+  spec.description   = %q{A program and Ruby library to generate lists of IP addresses from Nmap-style IP host specifications.}
   spec.homepage      = ""
   spec.license       = "GPLv3"
 
