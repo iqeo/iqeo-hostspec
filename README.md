@@ -3,23 +3,24 @@
 [![Gem Version](https://badge.fury.io/rb/iqeo-hostspec.png)](http://badge.fury.io/rb/iqeo-hostspec)
 [![Build Status](https://travis-ci.org/iqeo/iqeo-hostspec.png?branch=master)](https://travis-ci.org/iqeo/iqeo-hostspec)
 
-A utility and Ruby library to generate lists of IP addresses from Nmap-style IP host specifications.
+A program and Ruby library to generate lists of IP addresses from Nmap-style IP host specifications.
+
+For example:
 ```
 hostspec 1.0.0.1-3
+```
+Produces:
+```
 10.0.0.1
 10.0.0.2
 10.0.0.3
 ```
 
-In addition to expanding host specs to a list, a command may be executed for each IP address. See Program Usage below.
+In addition to expanding host specs to a list, a command may be executed for each IP address. This enables execution of commands for all hosts on a network. See Program Usage below.
 
 ## Installation
 
-Install a current version of Ruby from:
-
-```
-https://www.ruby-lang.org/en/installation/
-```
+Install a current version of Ruby from [https://www.ruby-lang.org/en/installation/](https://www.ruby-lang.org/en/installation/)
 
 Iqeo::Hostspec is packaged as a Ruby gem. To install, execute:
 

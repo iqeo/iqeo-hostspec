@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'iqeo/hostspec'
 include Iqeo::Hostspec
 
