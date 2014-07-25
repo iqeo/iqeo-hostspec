@@ -437,8 +437,8 @@ describe Hostspec do
 
       it 'responds to Enumerable methods' do
         hs = Hostspec.new '10.20.30.40/24'
-        hs.all? { |i| i.start_with? '10' }.should be_true
-        hs.any? { |i| i.end_with? '255'  }.should be_true
+        hs.all? { |i| i.start_with? '10' }.should eq true
+        hs.any? { |i| i.end_with? '255'  }.should eq true
       end
 
       it 'can calculate size for simple specs' do
