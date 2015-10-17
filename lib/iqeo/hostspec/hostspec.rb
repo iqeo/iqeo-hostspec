@@ -9,13 +9,15 @@ module Iqeo
 
       include Enumerable
 
-      attr_reader :string, :mask, :mask_length, :address_spec, :hostname
+      attr_reader :string, :mask, :mask_length, :address_spec, :hostname, :ports
 
       def initialize spec_str
         @string = spec_str
         raise HostspecException, 'spec cannot be empty' if spec_str.empty?
-        host_str, mask_str = split_on_slash spec_str
+        address_str, port_str = split_on_colon spec_str
+        host_str, mask_str = split_on_slash address_str
         raise HostspecException, 'host cannot be empty' if host_str.empty?
+        parse_port port_str
         parse_mask mask_str
         begin
           parse_address_spec host_str
@@ -26,12 +28,26 @@ module Iqeo
         mask_address_spec
       end
 
+      def split_on_colon str
+        case str.count ':'
+        when 0 then [ str.strip, '' ]
+        when 1 then str.strip.split ':'
+        else raise 'bad format, expected 0 or 1 ":"'
+        end
+      end
+
       def split_on_slash str
         case str.count '/'
         when 0 then [ str.strip, '' ]
         when 1 then str.strip.split '/'
         else raise 'bad format, expected 0 or 1 "/"'
         end
+      end
+
+      def parse_port str
+        # "tcp=1,2-3,4,udp=5,6-7,8,tcp=9,10-11,12"
+        protocol_ = str.scan /(\w+)=([\d\,\-]+)/
+        sections.inject(Hash.new{|h,k|h[k]=[]}) { |h,section| h[section[0].to_sym] << section[1] ; h } # parse_octet section[1] ? but with range 0-65535
       end
 
       def parse_mask str
@@ -57,16 +73,16 @@ module Iqeo
           high_bit_position = ( index * 8 ) + 1 
           low_bit_position = ( index + 1 ) * 8
           @address_spec[index] = case
-                                 when @mask_length >= low_bit_position then octet
-                                 when @mask_length < high_bit_position then [0..255]
-                                 else
-                                   octet_mask_length = @mask_length % 8
-                                   octet_mask = ( ( 2 ** octet_mask_length ) - 1 ) << ( 8 - octet_mask_length )
-                                   octet_mask_inverted = octet_mask ^ 255
-                                   octet_min = octet_mask & octet[0]
-                                   octet_max = octet_min | octet_mask_inverted
-                                   [octet_min..octet_max]
-                                 end
+          when @mask_length >= low_bit_position then octet
+          when @mask_length < high_bit_position then [0..255]
+          else
+            octet_mask_length = @mask_length % 8
+            octet_mask = ( ( 2 ** octet_mask_length ) - 1 ) << ( 8 - octet_mask_length )
+            octet_mask_inverted = octet_mask ^ 255
+            octet_min = octet_mask & octet[0]
+            octet_max = octet_min | octet_mask_inverted
+            [octet_min..octet_max]
+          end
         end
       end
 

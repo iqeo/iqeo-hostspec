@@ -1,0 +1,4 @@
+# fixup command example for proper quoting...
+
+hostspec 172.27.146.19-20 --cmd winexe --kerberos yes //'$(dig -x $HOSTSPEC_IP +short | sed s/\.$// )' "'ipconfig /all'"
+
